@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import localFont from "next/font/local";
 
 import { cn } from "@/lib/utils";
+import { QueryProvider } from "@/components/query-provider";
 
 import "./globals.css";
 
@@ -29,9 +30,13 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={cn(geistSans.variable, geistMono.variable, "antialiased min-h-screen")}
+        className={cn(
+          geistSans.variable,
+          geistMono.variable,
+          "antialiased min-h-screen"
+        )}
       >
-        {children}
+        <QueryProvider>{children}</QueryProvider>
       </body>
     </html>
   );
