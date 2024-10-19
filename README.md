@@ -4,6 +4,11 @@ This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-
 
 ## Links
 + [Hono](https://hono.dev/docs/guides/rpc)
++ [Appwrite](https://cloud.appwrite.io/)
++ [Appwrite Auth](https://appwrite.io/docs/products/auth/server-side-rendering)
++ [Server-side authentication with Next.js](https://appwrite.io/docs/tutorials/nextjs-ssr-auth/step-3)
++ [Please stop using middleware to protect your routes](https://pilcrowonpaper.com/blog/middleware-auth/)
++ [Next.js Authentication](https://nextjs.org/docs/pages/building-your-application/authentication#authentication-strategies)
 
 ## Getting Started
 
