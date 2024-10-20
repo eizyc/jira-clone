@@ -8,29 +8,41 @@ import { DATABASE_ID, WORKSPACES_ID } from "@/config";
 import { createWorkspaceSchema } from "../schemas";
 
 const app = new Hono()
-  .post(
-    "/",
-    zValidator("form", createWorkspaceSchema),
-    sessionMiddleware,
-    async (c) => {
-      const databases = c.get("databases");
-      const user = c.get("user");
+.post(
+  "/",
+  zValidator("form", createWorkspaceSchema),
+  sessionMiddleware,
+  async (c) => {
+    const databases = c.get("databases");
+    const user = c.get("user");
 
-      const { name } = c.req.valid("form");
+    const { name, image } = c.req.valid("form");
 
+    let uploadedImageUrl: string | undefined;
 
-      const workspace = await databases.createDocument(
-        DATABASE_ID,
-        WORKSPACES_ID,
-        ID.unique(),
-        {
-          name,
-          userId: user.$id,
-        },
-      );
+    if (image instanceof File) {
+      const { type } = image
 
-      return c.json({ data: workspace });
+      const arrayBuffer = await image.arrayBuffer();
+
+      const base64Code = Buffer.from(arrayBuffer).toString("base64")
+
+      uploadedImageUrl = `data:${type};base64,${base64Code}`;
     }
-  )
+
+    const workspace = await databases.createDocument(
+      DATABASE_ID,
+      WORKSPACES_ID,
+      ID.unique(),
+      {
+        name,
+        userId: user.$id,
+        imageUrl: uploadedImageUrl,
+      },
+    );
+
+    return c.json({ data: workspace });
+  }
+)
 
 export default app;
