@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import localFont from "next/font/local";
 
 import { cn } from "@/lib/utils";
+import { Toaster } from "@/components/ui/sonner";
 import { QueryProvider } from "@/components/query-provider";
 
 import "./globals.css";
@@ -36,7 +37,10 @@ export default function RootLayout({
           "antialiased min-h-screen"
         )}
       >
-        <QueryProvider>{children}</QueryProvider>
+        <QueryProvider>
+          <Toaster />
+          {children}
+        </QueryProvider>
       </body>
     </html>
   );
