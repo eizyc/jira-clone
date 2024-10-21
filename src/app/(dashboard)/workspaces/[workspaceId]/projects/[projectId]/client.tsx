@@ -6,6 +6,7 @@ import { PencilIcon } from "lucide-react";
 import { useProjectId } from "@/features/projects/hooks/use-project-id";
 import { useGetProject } from "@/features/projects/api/use-get-project";
 import { ProjectAvatar } from "@/features/projects/components/project-avatar";
+import { TaskViewSwitcher } from "@/features/tasks/components/task-view-switcher";
 
 import { Button } from "@/components/ui/button";
 import { PageError } from "@/components/page-error";
@@ -45,6 +46,7 @@ export const ProjectIdClient = () => {
           </Button>
         </div>
       </div>
+      <TaskViewSwitcher hideProjectFilter />
     </div>
   )
 };
