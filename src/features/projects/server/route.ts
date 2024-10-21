@@ -8,9 +8,8 @@ import { getMember } from "@/features/members/utils";
 import { DATABASE_ID, PROJECTS_ID } from "@/config";
 import { sessionMiddleware } from "@/lib/session-middleware";
 
-import { createProjectSchema } from "../schemas";
+import { createProjectSchema, updateProjectSchema } from "../schemas";
 import { Project } from "../types";
-
 const app = new Hono()
   .post(
     "/",
@@ -94,6 +93,123 @@ const app = new Hono()
       );
 
       return c.json({ data: projects });
+    }
+  )
+  .get(
+    "/:projectId",
+    sessionMiddleware,
+    async (c) => {
+      const user = c.get("user");
+      const databases = c.get("databases");
+      const { projectId } = c.req.param();
+
+      const project = await databases.getDocument<Project>(
+        DATABASE_ID,
+        PROJECTS_ID,
+        projectId,
+      );
+
+      const member = await getMember({
+        databases,
+        workspaceId: project.workspaceId,
+        userId: user.$id,
+      });
+
+      if (!member) {
+        return c.json({ error: "Unauthorized" }, 401);
+      }
+
+      return c.json({ data: project });
+    }
+  )
+  .patch(
+    "/:projectId",
+    sessionMiddleware,
+    zValidator("form", updateProjectSchema),
+    async (c) => {
+      const databases = c.get("databases");
+      const user = c.get("user");
+
+      const { projectId } = c.req.param();
+      const { name, image } = c.req.valid("form");
+
+      const existingProject = await databases.getDocument<Project>(
+        DATABASE_ID,
+        PROJECTS_ID,
+        projectId,
+      );
+
+      const member = await getMember({
+        databases,
+        workspaceId: existingProject.workspaceId,
+        userId: user.$id,
+      });
+
+      if (!member) {
+        return c.json({ error: "Unauthorized" }, 401);
+      }
+
+      let uploadedImageUrl: string | undefined;
+
+      if (image instanceof File) {
+        const { type } = image
+  
+        const arrayBuffer = await image.arrayBuffer();
+  
+        const base64Code = Buffer.from(arrayBuffer).toString("base64")
+  
+        uploadedImageUrl = `data:${type};base64,${base64Code}`;
+      } else {
+        uploadedImageUrl = image;
+      } 
+
+      const project = await databases.updateDocument(
+        DATABASE_ID,
+        PROJECTS_ID,
+        projectId,
+        {
+          name,
+          imageUrl: uploadedImageUrl
+        }
+      );
+
+      return c.json({ data: project });
+    }
+  )
+  .delete(
+    "/:projectId",
+    sessionMiddleware,
+    async (c) => {
+      const databases = c.get("databases");
+      const user = c.get("user");
+
+      const { projectId } = c.req.param();
+
+      const existingProject = await databases.getDocument<Project>(
+        DATABASE_ID,
+        PROJECTS_ID,
+        projectId,
+      );
+
+      const member = await getMember({
+        databases,
+        workspaceId: existingProject.workspaceId,
+        userId: user.$id,
+      });
+
+      if (!member) {
+        return c.json({ error: "Unauthorized" }, 401);
+      }
+
+      // TODO: Delete tasks
+
+      await databases.deleteDocument(
+        DATABASE_ID,
+        PROJECTS_ID,
+        projectId,
+      );
+
+      return c.json({ data: { $id: existingProject.$id } });
     }
   );
 
