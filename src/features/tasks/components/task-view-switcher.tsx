@@ -10,15 +10,23 @@ import { Button } from "@/components/ui/button";
 import { DottedSeparator } from "@/components/dotted-separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
+import { DataFilters } from "./data-filters";
 
 import { useGetTasks } from "../api/use-get-tasks";
 import { useCreateTaskModal } from "../hooks/use-create-task-modal";
+import { useTaskFilters } from "../hooks/use-task-filters";
 
 interface TaskViewSwitcherProps {
   hideProjectFilter?: boolean;
 };
 
-export const TaskViewSwitcher = ({}: TaskViewSwitcherProps) => {
+export const TaskViewSwitcher = ({ hideProjectFilter }: TaskViewSwitcherProps) => {
+  const [{
+    status,
+    assigneeId,
+    projectId,
+    dueDate
+  }] = useTaskFilters();
   const [view, setView] = useQueryState("task-view", {
     defaultValue: "table",
   });
@@ -28,11 +36,14 @@ export const TaskViewSwitcher = ({}: TaskViewSwitcherProps) => {
   const { open } = useCreateTaskModal();
 
   const { 
-    data: tasks,
+    data: tasks, 
     isLoading: isLoadingTasks
   } = useGetTasks({
     workspaceId,
-    projectId: paramProjectId,
+    projectId: paramProjectId || projectId,
+    assigneeId,
+    status,
+    dueDate,
   });
 
   return (
@@ -72,6 +83,8 @@ export const TaskViewSwitcher = ({}: TaskViewSwitcherProps) => {
             New
           </Button>
         </div>
+        <DottedSeparator className="my-4" />
+        <DataFilters hideProjectFilter={hideProjectFilter} />
         <DottedSeparator className="my-4" />
         {isLoadingTasks ? (
           <div className="w-full border rounded-lg h-[200px] flex flex-col items-center justify-center">
